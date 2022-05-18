@@ -10,8 +10,8 @@ export class TodoService {
     return `Hello ${id}`;
   }
 
-  addTodo(): string {
-    return 'add todo in this methode';
+  addTodo(data: any): void {
+    console.log(data);
   }
 
   updateTodo(id: string): string {

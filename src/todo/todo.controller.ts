@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Res, Req } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Res, Req, Body } from "@nestjs/common";
 import { TodoService } from './todo.service';
 import { Request, Response } from 'express';
 
@@ -19,9 +19,18 @@ export class TodoController {
   }
 
   @Post()
-  addTodo(@Res() res: Response) {
-    const data = this.todoService.addTodo();
-    res.status(200).send({ status: 'OK', data: data });
+  addTodo(@Body() myData, @Res() res: Response) {
+
+    if (!myData.name) {
+      res.status(400).send({
+        status: 'Echèc',
+        data: {
+          error: "Echèc d'ajout. Données manquantes",
+        },
+      });
+    }
+    this.todoService.addTodo(myData);
+    res.status(201).send({ status: 'Objet crée avec succès', data: myData });
   }
 
   @Patch(':id')

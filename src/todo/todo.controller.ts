@@ -1,32 +1,38 @@
-import { Controller, Get, Param, Post, Patch, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Res, Req } from '@nestjs/common';
 import { TodoService } from './todo.service';
+import { Request, Response } from 'express';
 
 @Controller('todo')
 export class TodoController {
   constructor(private readonly todoService: TodoService) {}
 
   @Get()
-  getAllTodos(): string {
-    return this.todoService.getAllTodos();
+  getAllTodos(@Res() res: Response) {
+    const data = this.todoService.getAllTodos();
+    res.status(200).send({ status: 'OK', data: data });
   }
 
   @Get(':id')
-  getTodo(@Param() params): string {
-    return this.todoService.getTodo(params.id);
+  getTodo(@Req() req: Request, @Res() res: Response) {
+    const data = this.todoService.getTodo(req.params.id);
+    res.status(200).send({ status: 'OK', data: data });
   }
 
   @Post()
-  addTodo(): string{
-    return this.todoService.addTodo();
+  addTodo(@Res() res: Response) {
+    const data = this.todoService.addTodo();
+    res.status(200).send({ status: 'OK', data: data });
   }
 
   @Patch(':id')
-  updateTodo(@Param() params): string{
-    return this.todoService.updateTodo(params.id);
+  updateTodo(@Req() req: Request, @Res() res: Response) {
+    const data = this.todoService.updateTodo(req.params.id);
+    res.status(200).send({ status: 'OK', data: data });
   }
 
   @Delete(':id')
-  deleteTodo(@Param() params): string{
-    return this.todoService.deleteTodo(params.id);
+  deleteTodo(@Req() req: Request, @Res() res: Response) {
+    const data = this.todoService.deleteTodo(req.params.id);
+    res.status(200).send({ status: 'OK', data: data });
   }
 }

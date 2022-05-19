@@ -12,6 +12,7 @@ import {
 import { TodoService } from './todo.service';
 import { Request, Response } from 'express';
 import { Todo } from './entities/todo.entity';
+import { SyntaxErrorException } from './errors/error-handler';
 
 @Controller('todo')
 export class TodoController {
@@ -27,16 +28,13 @@ export class TodoController {
     response.status(200).send({ status: 'OK', data: todo });
   }
 
-  @Get('/:id')
+  @Get(':id')
   getTodo(@Param() params, @Res() res: Response) {
     try {
       const data = this.todoService.getTodo(params.id);
       res.status(200).send({ status: 'OK', data: data });
     } catch (e) {
-      throw {
-        status: e?.status || 500,
-        message: e.message || e,
-      };
+      throw new SyntaxErrorException();
     }
   }
 
@@ -56,18 +54,37 @@ export class TodoController {
   }
 
   @Patch(':id')
-  updateTodo(@Req() req: Request, @Res() res: Response) {
-    const data = this.todoService.updateTodo(req.params.id);
-    res.status(200).send({ status: 'OK', data: data });
+  updateTodo(@Req() request: Request, @Res() res: Response) {
+    const {
+      params: { todoId },
+      body,
+    } = request;
+    if (!todoId) {
+      res.status(400).send({
+        status: 'FAILED',
+        data: {
+          error: 'Spécifier une référence',
+        },
+      });
+    }
+
+    try {
+      const dataToUpdate = this.todoService.updateTodo(todoId, body);
+      res.status(200).send({ status: 'OK', data: dataToUpdate });
+    } catch (e) {
+      res
+        .status(e?.status || 500)
+        .send({ status: 'FAILED', data: { error: e?.message || e } });
+    }
   }
 
   @Delete(':id')
   deleteTodo(@Req() req: Request, @Res() res: Response) {
-    const data = this.todoService.deleteTodo(req.params.id);
-    res.status(200).send({ status: 'OK', data: data });
+    try {
+      const data = this.todoService.deleteTodo(req.params.id);
+      res.status(200).send({ status: 'OK', data: data });
+    } catch (e) {
+      throw new SyntaxErrorException();
+    }
   }
-}
-
-function params() {
-  throw new Error('Function not implemented.');
 }

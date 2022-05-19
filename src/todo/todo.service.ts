@@ -12,18 +12,17 @@ export class TodoService {
   getTodo(id: any): Todo {
     try {
       const getData = this.todo.find((todo) => todo.id === +id);
-
       if (!getData) {
         throw {
           status: 400,
-          message: 'La donnée est inexistant',
+          message: 'Erreur sur la référence !',
         };
       }
       return getData;
     } catch (e) {
       throw {
-        status: e.status || e,
-        message: e.message || e,
+        status: e?.status || 500,
+        message: e?.status || 500,
       };
     }
   }
@@ -53,11 +52,41 @@ export class TodoService {
     this.todo.push(data);
   }
 
-  updateTodo(id: string): string {
-    return `this methode update this ${id} todo`;
+  updateTodo(id: any, fieldToChange: Todo): Todo {
+    const findIndexTodo = this.todo.findIndex((todo) => todo.id === +id);
+
+    if (findIndexTodo === -1) {
+      throw {
+        status: 400,
+        message: 'Cette tâche introuvable',
+      };
+    }
+    const newTodo = {
+      ...this.todo[findIndexTodo],
+      ...fieldToChange,
+      dateToUpdate: new Date().toLocaleDateString('fr-FR', { timeZone: 'UTC' }),
+    };
+    try {
+      this.todo[findIndexTodo] = newTodo;
+      return newTodo;
+    } catch (e) {
+      throw {
+        status: e?.status || 500,
+        message: e.message || e,
+      };
+    }
   }
 
-  deleteTodo(id: string): string {
-    return `delete this ${id}`;
+  deleteTodo(id: any): Todo {
+    const findDataToDelete = this.todo.findIndex((todo) => todo.id === +id);
+    if (findDataToDelete === -1) {
+      throw {
+        status: 400,
+        message: 'donnée introuvable',
+      };
+    }
+    const data = this.todo[findDataToDelete];
+    this.todo.splice(findDataToDelete, 1);
+    return data;
   }
 }

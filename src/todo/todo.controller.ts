@@ -12,7 +12,8 @@ import {
 import { TodoService } from './todo.service';
 import { Request, Response } from 'express';
 import { Todo } from './entities/todo.entity';
-import { SyntaxErrorException } from './errors/error-handler';
+import { SyntaxErrorSearchDataException } from './errors/error-handler';
+import { AddTodo } from './dto/add-todo.dto';
 
 @Controller('todo')
 export class TodoController {
@@ -34,12 +35,12 @@ export class TodoController {
       const data = this.todoService.getTodo(params.id);
       res.status(200).send({ status: 'OK', data: data });
     } catch (e) {
-      throw new SyntaxErrorException();
+      throw new SyntaxErrorSearchDataException();
     }
   }
 
   @Post()
-  addTodo(@Body() myData: Todo, @Res() res: Response) {
+  addTodo(@Body() myData: AddTodo, @Res() res: Response) {
     try {
       this.todoService.addTodo(myData);
       res.status(201).send({ status: 'Objet crée avec succès', data: myData });
@@ -54,11 +55,7 @@ export class TodoController {
   }
 
   @Patch(':id')
-  updateTodo(@Req() request: Request, @Res() res: Response) {
-    const {
-      params: { todoId },
-      body,
-    } = request;
+  updateTodo(@Param('id') todoId: string, @Body() body: AddTodo, @Res() res: Response) {
     if (!todoId) {
       res.status(400).send({
         status: 'FAILED',
@@ -84,7 +81,7 @@ export class TodoController {
       const data = this.todoService.deleteTodo(req.params.id);
       res.status(200).send({ status: 'OK', data: data });
     } catch (e) {
-      throw new SyntaxErrorException();
+      throw new SyntaxErrorSearchDataException();
     }
   }
 }

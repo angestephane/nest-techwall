@@ -1,5 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Todo } from './entities/todo.entity';
+import { AddTodo } from './dto/add-todo.dto';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class TodoService {
@@ -27,34 +29,40 @@ export class TodoService {
     }
   }
 
-  addTodo(data: Todo): void {
-    if (this.todo.length) {
-      data.id = this.todo[this.todo.length - 1].id + 1;
-    } else {
-      data.id = 1;
-    }
-
-    if (!data.name) {
+  addTodo(data: AddTodo): void {
+    if (!data.name || !data.description) {
       throw {
         status: 400,
-        message: 'vous devez définir le nom de la tâche',
+        message: 'Donnée manquante !',
       };
-    } else {
-      this.todo.map((todo) => {
-        if (todo.name === data.name) {
-          throw {
-            status: 400,
-            message: 'Cette tâche existe !',
-          };
-        }
-      });
     }
-    this.todo.push(data);
+
+    const newTodo = {
+      name: data.name,
+      description: data.description,
+    };
+
+    const todoToAdd: Todo = {
+      ...newTodo,
+      dateToCreate: new Date().toLocaleDateString('fr-FR', { timeZone: 'UTC' }),
+      dateToUpdate: new Date().toLocaleDateString('fr-FR', { timeZone: 'UTC' }),
+      id: uuid(),
+    };
+    const testIfDataExiste = this.todo.find(
+      (todo) => todo.name === todoToAdd.name,
+    );
+    if (testIfDataExiste) {
+      throw {
+        status: 400,
+        message: 'La tâche existe !',
+      };
+    }
+    this.todo.push(todoToAdd);
   }
 
-  updateTodo(id: any, fieldToChange: Todo): Todo {
-    const findIndexTodo = this.todo.findIndex((todo) => todo.id === +id);
-
+  updateTodo(id: string, fieldToChange: AddTodo): Todo {
+    const findIndexTodo = this.todo.findIndex((todo) => todo.id === id);
+    console.log(findIndexTodo);
     if (findIndexTodo === -1) {
       throw {
         status: 400,
@@ -66,27 +74,21 @@ export class TodoService {
       ...fieldToChange,
       dateToUpdate: new Date().toLocaleDateString('fr-FR', { timeZone: 'UTC' }),
     };
-    try {
-      this.todo[findIndexTodo] = newTodo;
-      return newTodo;
-    } catch (e) {
-      throw {
-        status: e?.status || 500,
-        message: e.message || e,
-      };
-    }
+    this.todo[findIndexTodo] = newTodo;
+    return newTodo;
   }
 
   deleteTodo(id: any): Todo {
     const findDataToDelete = this.todo.findIndex((todo) => todo.id === +id);
     if (findDataToDelete === -1) {
-      throw {
+      throw new NotFoundException({
         status: 400,
         message: 'donnée introuvable',
-      };
+      });
+    } else {
+      const data = this.todo[findDataToDelete];
+      this.todo.splice(findDataToDelete, 1);
+      return data;
     }
-    const data = this.todo[findDataToDelete];
-    this.todo.splice(findDataToDelete, 1);
-    return data;
   }
 }

@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
-export class SyntaxErrorException extends HttpException {
+export class SyntaxErrorSearchDataException extends HttpException {
   constructor() {
     super(
       'Impossible de récupérer la donnée à cette référence ',

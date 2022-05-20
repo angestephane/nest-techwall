@@ -1,4 +1,4 @@
-export class AddTodo {
+export class AddTodoDto {
   name: string;
   description: string;
 }

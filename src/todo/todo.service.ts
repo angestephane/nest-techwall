@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Todo } from './entities/todo.entity';
-import { AddTodo } from './dto/add-todo.dto';
+import { AddTodoDto } from './dto/add-todo.dto';
 import { v4 as uuid } from 'uuid';
+import { UpdateTodoDto } from './dto/update-todo.dto';
 
 @Injectable()
 export class TodoService {
@@ -22,7 +23,7 @@ export class TodoService {
     return getData;
   }
 
-  addTodo(data: AddTodo): void {
+  addTodo(data: AddTodoDto): void {
     if (!data.name || !data.description) {
       throw {
         status: 400,
@@ -30,13 +31,14 @@ export class TodoService {
       };
     }
 
-    const newTodo = {
+    const newTodo: AddTodoDto = {
       name: data.name,
       description: data.description,
     };
 
     const todoToAdd: Todo = {
       ...newTodo,
+      status: 'en cours',
       dateToCreate: new Date().toLocaleString('fr-FR', { timeZone: 'UTC' }),
       dateToUpdate: new Date().toLocaleString('fr-FR', { timeZone: 'UTC' }),
       id: uuid(),
@@ -53,7 +55,7 @@ export class TodoService {
     this.todo.push(todoToAdd);
   }
 
-  updateTodo(id: string, fieldToChange: AddTodo): Todo {
+  updateTodo(id: string, fieldToChange: UpdateTodoDto): Todo {
     const findIndexTodo = this.todo.findIndex((todo) => todo.id === id);
     console.log(findIndexTodo);
     if (findIndexTodo === -1) {

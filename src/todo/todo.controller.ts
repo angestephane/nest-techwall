@@ -13,13 +13,14 @@ import { TodoService } from './todo.service';
 import { Request, Response } from 'express';
 import { Todo } from './entities/todo.entity';
 import { SyntaxErrorSearchDataException } from './errors/error-handler';
-import { AddTodo } from './dto/add-todo.dto';
+import { AddTodoDto } from './dto/add-todo.dto';
+import { UpdateTodoDto } from "./dto/update-todo.dto";
 
 @Controller('todo')
 export class TodoController {
   todo: Array<Todo>;
 
-  constructor(private readonly todoService: TodoService) {
+  constructor(private todoService: TodoService) {
     this.todo = [];
   }
 
@@ -40,7 +41,7 @@ export class TodoController {
   }
 
   @Post()
-  addTodo(@Body() myData: AddTodo, @Res() res: Response) {
+  addTodo(@Body() myData: AddTodoDto, @Res() res: Response) {
     try {
       this.todoService.addTodo(myData);
       res.status(201).send({ status: 'Objet crée avec succès', data: myData });
@@ -55,7 +56,11 @@ export class TodoController {
   }
 
   @Patch(':id')
-  updateTodo(@Param('id') todoId: string, @Body() body: AddTodo, @Res() res: Response) {
+  updateTodo(
+    @Param('id') todoId: string,
+    @Body() body: UpdateTodoDto,
+    @Res() res: Response,
+  ) {
     if (!todoId) {
       res.status(400).send({
         status: 'FAILED',

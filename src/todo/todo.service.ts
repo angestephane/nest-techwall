@@ -12,21 +12,14 @@ export class TodoService {
   }
 
   getTodo(id: any): Todo {
-    try {
-      const getData = this.todo.find((todo) => todo.id === +id);
-      if (!getData) {
-        throw {
-          status: 400,
-          message: 'Erreur sur la référence !',
-        };
-      }
-      return getData;
-    } catch (e) {
+    const getData = this.todo.find((todo) => todo.id === id);
+    if (!getData) {
       throw {
-        status: e?.status || 500,
-        message: e?.status || 500,
+        status: 400,
+        message: 'Erreur sur la référence !',
       };
     }
+    return getData;
   }
 
   addTodo(data: AddTodo): void {
@@ -44,8 +37,8 @@ export class TodoService {
 
     const todoToAdd: Todo = {
       ...newTodo,
-      dateToCreate: new Date().toLocaleDateString('fr-FR', { timeZone: 'UTC' }),
-      dateToUpdate: new Date().toLocaleDateString('fr-FR', { timeZone: 'UTC' }),
+      dateToCreate: new Date().toLocaleString('fr-FR', { timeZone: 'UTC' }),
+      dateToUpdate: new Date().toLocaleString('fr-FR', { timeZone: 'UTC' }),
       id: uuid(),
     };
     const testIfDataExiste = this.todo.find(
@@ -72,19 +65,19 @@ export class TodoService {
     const newTodo = {
       ...this.todo[findIndexTodo],
       ...fieldToChange,
-      dateToUpdate: new Date().toLocaleDateString('fr-FR', { timeZone: 'UTC' }),
+      dateToUpdate: new Date().toLocaleString('fr-FR', { timeZone: 'UTC' }),
     };
     this.todo[findIndexTodo] = newTodo;
     return newTodo;
   }
 
-  deleteTodo(id: any): Todo {
-    const findDataToDelete = this.todo.findIndex((todo) => todo.id === +id);
+  deleteTodo(id: string): Todo {
+    const findDataToDelete = this.todo.findIndex((todo) => todo.id === id);
     if (findDataToDelete === -1) {
-      throw new NotFoundException({
+      throw {
         status: 400,
         message: 'donnée introuvable',
-      });
+      };
     } else {
       const data = this.todo[findDataToDelete];
       this.todo.splice(findDataToDelete, 1);

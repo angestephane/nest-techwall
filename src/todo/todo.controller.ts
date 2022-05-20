@@ -30,9 +30,9 @@ export class TodoController {
   }
 
   @Get(':id')
-  getTodo(@Param() params, @Res() res: Response) {
+  getTodo(@Param('id') params, @Res() res: Response) {
     try {
-      const data = this.todoService.getTodo(params.id);
+      const data = this.todoService.getTodo(params);
       res.status(200).send({ status: 'OK', data: data });
     } catch (e) {
       throw new SyntaxErrorSearchDataException();

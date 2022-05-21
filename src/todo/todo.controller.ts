@@ -1,20 +1,24 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Res,
-  Req,
   Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
   Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  Req,
+  Res,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { Request, Response } from 'express';
 import { Todo } from './entities/todo.entity';
 import { SyntaxErrorSearchDataException } from './errors/error-handler';
 import { AddTodoDto } from './dto/add-todo.dto';
-import { UpdateTodoDto } from "./dto/update-todo.dto";
+import { UpdateTodoDto } from './dto/update-todo.dto';
+import { PaginationFilter } from './dto/get-pagination-todo.dto';
 
 @Controller('todo')
 export class TodoController {
@@ -25,8 +29,12 @@ export class TodoController {
   }
 
   @Get()
-  getAllTodos(@Body() data: Todo, @Res() response: Response) {
-    const todo = this.todoService.getAllTodos();
+  getAllTodos(
+    @Body() data: Todo,
+    @Query() query: PaginationFilter,
+    @Res() response: Response,
+  ) {
+    const todo = this.todoService.getAllTodos(query);
     response.status(200).send({ status: 'OK', data: todo });
   }
 

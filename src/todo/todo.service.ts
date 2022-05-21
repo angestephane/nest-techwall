@@ -3,12 +3,16 @@ import { Todo } from './entities/todo.entity';
 import { AddTodoDto } from './dto/add-todo.dto';
 import { v4 as uuid } from 'uuid';
 import { UpdateTodoDto } from './dto/update-todo.dto';
+import { PaginationFilter } from './dto/get-pagination-todo.dto';
 
 @Injectable()
 export class TodoService {
   private todo: Array<Todo> = [];
 
-  getAllTodos(): Array<Todo> {
+  getAllTodos(query: PaginationFilter): Array<Todo> {
+    if (query.item) {
+      return this.todo.slice(0, query.item);
+    }
     return this.todo;
   }
 

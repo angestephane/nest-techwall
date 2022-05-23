@@ -5,7 +5,6 @@ import {
   Get,
   HttpStatus,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -57,6 +56,7 @@ export class TodoController {
       res.status(e?.status || 500).send({
         status: 'FAILED',
         data: {
+          code: e?.status || 500,
           error: e.message || e,
         },
       });
@@ -70,9 +70,10 @@ export class TodoController {
     @Res() res: Response,
   ) {
     if (!todoId) {
-      res.status(400).send({
+      res.status(HttpStatus.NOT_ACCEPTABLE).send({
         status: 'FAILED',
         data: {
+          code: HttpStatus.NOT_ACCEPTABLE,
           error: 'Spécifier une référence',
         },
       });
@@ -82,9 +83,10 @@ export class TodoController {
       const dataToUpdate = this.todoService.updateTodo(todoId, body);
       res.status(200).send({ status: 'OK', data: dataToUpdate });
     } catch (e) {
-      res
-        .status(e?.status || 500)
-        .send({ status: 'FAILED', data: { error: e?.message || e } });
+      res.status(e?.status || 500).send({
+        status: 'FAILED',
+        data: { code: HttpStatus.NOT_FOUND, error: e?.message || e },
+      });
     }
   }
 

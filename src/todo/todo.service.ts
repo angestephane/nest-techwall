@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { Todo } from './entities/todo.entity';
 import { AddTodoDto } from './dto/add-todo.dto';
 import { v4 as uuid } from 'uuid';
@@ -19,20 +19,18 @@ export class TodoService {
   getTodo(id: any): Todo {
     const getData = this.todo.find((todo) => todo.id === id);
     if (!getData) {
-      throw {
-        status: 400,
-        message: 'Erreur sur la référence !',
-      };
+      throw new NotFoundException({
+        message: 'Tâche non introuvable !',
+      });
     }
     return getData;
   }
 
   addTodo(data: AddTodoDto): void {
     if (!data.name || !data.description) {
-      throw {
-        status: 400,
-        message: 'Donnée manquante !',
-      };
+      throw new BadRequestException({
+        message: 'Données manquantes !',
+      });
     }
 
     const newTodo: AddTodoDto = {
@@ -51,10 +49,10 @@ export class TodoService {
       (todo) => todo.name === todoToAdd.name,
     );
     if (testIfDataExiste) {
-      throw {
-        status: 400,
+      throw new ConflictException({
+        statusCode: HttpStatus.CONFLICT,
         message: 'La tâche existe !',
-      };
+      });
     }
     this.todo.push(todoToAdd);
   }
@@ -63,10 +61,10 @@ export class TodoService {
     const findIndexTodo = this.todo.findIndex((todo) => todo.id === id);
     console.log(findIndexTodo);
     if (findIndexTodo === -1) {
-      throw {
-        status: 400,
-        message: 'Cette tâche introuvable',
-      };
+      throw new NotFoundException({
+        status: HttpStatus.NOT_FOUND,
+        message: 'Tâche à modifier introuvable',
+      });
     }
     const newTodo = {
       ...this.todo[findIndexTodo],

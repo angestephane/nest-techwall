@@ -10,6 +10,7 @@ import {
   Query,
   Req,
   Res,
+  UseInterceptors,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { Request, Response } from 'express';
@@ -17,8 +18,10 @@ import { Todo } from './entities/todo.entity';
 import { SyntaxErrorSearchDataException } from './errors/error-handler';
 import { AddTodoDto } from './dto/add-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
-import { PaginationFilter } from './dto/get-pagination-todo.dto';
+import { FilterDatas } from './dto/get-pagination-todo.dto';
+import { GetRequestDurationInterceptor } from './interceptors/get-request-duration.interceptor';
 
+@UseInterceptors(GetRequestDurationInterceptor)
 @Controller('todo')
 export class TodoController {
   todo: Array<Todo>;
@@ -30,7 +33,7 @@ export class TodoController {
   @Get()
   getAllTodos(
     @Body() data: Todo,
-    @Query() query: PaginationFilter,
+    @Query() query: FilterDatas,
     @Res() response: Response,
   ) {
     const todo = this.todoService.getAllTodos(query);

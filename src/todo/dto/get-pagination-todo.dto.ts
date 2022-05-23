@@ -1,7 +1,7 @@
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from "class-validator";
 import { Type } from 'class-transformer';
 
-export class PaginationFilter {
+export class FilterDatas {
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
@@ -11,4 +11,8 @@ export class PaginationFilter {
   @IsOptional()
   @Type(() => Number)
   item: number;
+
+  @IsString()
+  @IsOptional()
+  status: string;
 }

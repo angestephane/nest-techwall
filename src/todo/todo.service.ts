@@ -1,17 +1,28 @@
-import { BadRequestException, ConflictException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Todo } from './entities/todo.entity';
 import { AddTodoDto } from './dto/add-todo.dto';
 import { v4 as uuid } from 'uuid';
 import { UpdateTodoDto } from './dto/update-todo.dto';
-import { PaginationFilter } from './dto/get-pagination-todo.dto';
+import { FilterDatas } from './dto/get-pagination-todo.dto';
 
 @Injectable()
 export class TodoService {
   private todo: Array<Todo> = [];
 
-  getAllTodos(query: PaginationFilter): Array<Todo> {
+  getAllTodos(query: FilterDatas): Array<Todo> {
     if (query.item) {
       return this.todo.slice(0, query.item);
+    }
+    if (query.status) {
+      return this.todo.filter((todo) =>
+        todo.status.toLowerCase().includes(query.status),
+      );
     }
     return this.todo;
   }

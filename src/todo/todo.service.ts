@@ -20,7 +20,21 @@ export class TodoService {
   ) {}
 
   async getAllTodos(query: FilterDatas): Promise<Todo[]> {
-    return await this.todoRepository.find();
+    if (query.status) {
+      return await this.todoRepository.find({
+        select: ['name', 'status', 'description', 'dateToCreate'],
+        where: {
+          status: query.status,
+        },
+      });
+    }
+    return await this.todoRepository.find({
+      select: ['name', 'status', 'description', 'dateToCreate'],
+    });
+  }
+
+  async getOneTodo(todoId: string): Promise<Todo> {
+    return await this.todoRepository.findOne(todoId);
   }
 
   async addTodo(data: AddTodoDto): Promise<Todo> {

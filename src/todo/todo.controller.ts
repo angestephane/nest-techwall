@@ -24,16 +24,19 @@ import { UpdateTodoDto } from './dto/update-todo.dto';
 export class TodoController {
   constructor(private todoService: TodoService) {}
 
+  // Obtenir la liste des todoListe
   @Get()
   async getAllTodos(@Query() query: FilterDatas): Promise<Array<Todo>> {
     return await this.todoService.getAllTodos(query);
   }
 
+  // Ajouter un nouveau todoListe
   @Post()
   async addTodo(@Body() data: AddTodoDto): Promise<Todo> {
     return await this.todoService.addTodo(data);
   }
 
+  // Mise à jour d'une todoListe
   @Patch(':id')
   async updateTodo(
     @Param('id') todoId: string,
@@ -42,6 +45,13 @@ export class TodoController {
     return await this.todoService.updateTodo(todoId, data);
   }
 
+  //obtenir une données via son id
+  @Get(':id')
+  async getOneTodo(@Param('id') todoId: string): Promise<Todo> {
+    return await this.todoService.getOneTodo(todoId);
+  }
+
+  // Supprimer un todoListe
   @Delete(':id')
   async deleteTodo(@Param('id') todoId: string): Promise<Todo> {
     return await this.todoService.deleteTodo(todoId);

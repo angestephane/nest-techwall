@@ -4,11 +4,11 @@ export class TimestampEntitie {
   @CreateDateColumn({
     update: false,
   })
-  dateToCreate: Date;
+  dateToCreate: string;
 
   @UpdateDateColumn()
-  dateToUpdate: Date;
+  dateToUpdate: string;
 
   @DeleteDateColumn()
-  dateToDelete: Date;
+  dateToDelete: string;
 }

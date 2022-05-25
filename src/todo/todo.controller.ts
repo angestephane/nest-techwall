@@ -13,7 +13,7 @@ import { TodoService } from './todo.service';
 import { Request, Response } from 'express';
 import { Todo } from './entities/todo.entity';
 
-import { FilterDatas } from './dto/get-pagination-todo.dto';
+import { FilterDatas } from './dto/get-query-todo.dto';
 import { GetRequestDurationInterceptor } from './interceptors/get-request-duration.interceptor';
 
 import { AddTodoDto } from './dto/add-todo.dto';
@@ -30,6 +30,11 @@ export class TodoController {
     return await this.todoService.getAllTodos(query);
   }
 
+  // Retourne le nombre de tâche terminées
+  @Get('stats')
+  async countTask(@Query() status: FilterDatas) {
+    return await this.todoService.countTask(status);
+  }
   // Ajouter un nouveau todoListe
   @Post()
   async addTodo(@Body() data: AddTodoDto): Promise<Todo> {

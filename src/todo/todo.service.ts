@@ -1,14 +1,8 @@
-import {
-  BadRequestException,
-  ConflictException,
-  HttpStatus,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { Todo } from './entities/todo.entity';
 import { AddTodoDto } from './dto/add-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
-import { FilterDatas } from './dto/get-pagination-todo.dto';
+import { FilterDatas } from './dto/get-query-todo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -81,5 +75,17 @@ export class TodoService {
   //!desarchiver une tâche
   async desarchiverTodo(todoId: string) {
     return await this.todoRepository.restore(todoId);
+  }
+
+  /**
+   * !compter le nombre de tâche accomplies, et en cours
+   * !Même logique pour les tâches en cours
+   */
+  async countTask(status: FilterDatas) {
+    const qb = this.todoRepository.createQueryBuilder('countTask');
+    qb.select(
+      "countTask.status, count(countTask.id) as 'Nombre tâches Terminées'",
+    ).where('countTask.status = :status', { status: status.status });
+    return await qb.getRawOne();
   }
 }

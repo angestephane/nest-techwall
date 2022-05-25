@@ -7,96 +7,65 @@ import {
 } from '@nestjs/common';
 import { Todo } from './entities/todo.entity';
 import { AddTodoDto } from './dto/add-todo.dto';
-import { v4 as uuid } from 'uuid';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 import { FilterDatas } from './dto/get-pagination-todo.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TodoService {
-  private todo: Array<Todo> = [];
+  constructor(
+    @InjectRepository(Todo)
+    private todoRepository: Repository<Todo>,
+  ) {}
 
-  getAllTodos(query: FilterDatas): Array<Todo> {
-    if (query.item) {
-      return this.todo.slice(0, query.item);
-    }
-    if (query.status) {
-      return this.todo.filter((todo) =>
-        todo.status.toLowerCase().includes(query.status),
-      );
-    }
-    return this.todo;
+  async getAllTodos(query: FilterDatas): Promise<Todo[]> {
+    return await this.todoRepository.find();
   }
 
-  getTodo(id: any): Todo {
-    const getData = this.todo.find((todo) => todo.id === id);
-    if (!getData) {
+  async addTodo(data: AddTodoDto): Promise<Todo> {
+    return await this.todoRepository.save(data);
+  }
+
+  async updateTodo(todoId: string, todoUpdated: UpdateTodoDto): Promise<Todo> {
+    /***
+     * TODO: On récupère la tache à l'id 'todoId, on remplace les
+     * TODO: les données par ceux de todoUpdated
+     * *****/
+    const newTodo = await this.todoRepository.preload({
+      id: todoId,
+      ...todoUpdated,
+    });
+
+    //Test si la tâche n'existe pas
+    if (!newTodo) {
       throw new NotFoundException({
-        message: 'Tâche non introuvable !',
+        code: HttpStatus.NOT_FOUND,
+        message: `Tâche #${todoId} non trouvée`,
       });
     }
-    return getData;
+    return await this.todoRepository.save(newTodo);
   }
 
-  addTodo(data: AddTodoDto): void {
-    if (!data.name || !data.description) {
-      throw new BadRequestException({
-        message: 'Données manquantes !',
-      });
-    }
-
-    const newTodo: AddTodoDto = {
-      name: data.name,
-      description: data.description,
-    };
-
-    const todoToAdd: Todo = {
-      ...newTodo,
-      status: 'en cours',
-      dateToCreate: new Date().toLocaleString('fr-FR', { timeZone: 'UTC' }),
-      dateToUpdate: new Date().toLocaleString('fr-FR', { timeZone: 'UTC' }),
-      id: uuid(),
-    };
-    const testIfDataExiste = this.todo.find(
-      (todo) => todo.name === todoToAdd.name,
-    );
-    if (testIfDataExiste) {
-      throw new ConflictException({
-        statusCode: HttpStatus.CONFLICT,
-        message: 'La tâche existe !',
-      });
-    }
-    this.todo.push(todoToAdd);
-  }
-
-  updateTodo(id: string, fieldToChange: UpdateTodoDto): Todo {
-    const findIndexTodo = this.todo.findIndex((todo) => todo.id === id);
-    console.log(findIndexTodo);
-    if (findIndexTodo === -1) {
+  async deleteTodo(todoId: string): Promise<Todo> {
+    const todoToDelete = await this.todoRepository.findOne(todoId);
+    if (!todoToDelete) {
       throw new NotFoundException({
-        status: HttpStatus.NOT_FOUND,
-        message: 'Tâche à modifier introuvable',
+        code: HttpStatus.NOT_FOUND,
+        message: `Todo #${todoId} non trouvée`,
       });
     }
-    const newTodo = {
-      ...this.todo[findIndexTodo],
-      ...fieldToChange,
-      dateToUpdate: new Date().toLocaleString('fr-FR', { timeZone: 'UTC' }),
-    };
-    this.todo[findIndexTodo] = newTodo;
-    return newTodo;
+    return await this.todoRepository.remove(todoToDelete);
   }
 
-  deleteTodo(id: string): Todo {
-    const findDataToDelete = this.todo.findIndex((todo) => todo.id === id);
-    if (findDataToDelete === -1) {
-      throw {
-        status: 400,
-        message: 'donnée introuvable',
-      };
-    } else {
-      const data = this.todo[findDataToDelete];
-      this.todo.splice(findDataToDelete, 1);
-      return data;
-    }
+  //Archiver ou desarchiver une tâche
+  //!archiver une tâche
+  async archiverTodo(todoId: string) {
+    return await this.todoRepository.softDelete(todoId);
+  }
+
+  //!desarchiver une tâche
+  async desarchiverTodo(todoId: string) {
+    return await this.todoRepository.restore(todoId);
   }
 }

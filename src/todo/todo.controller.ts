@@ -3,103 +3,59 @@ import {
   Controller,
   Delete,
   Get,
-  HttpStatus,
   Param,
   Patch,
   Post,
   Query,
-  Req,
-  Res,
   UseInterceptors,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { Request, Response } from 'express';
 import { Todo } from './entities/todo.entity';
-import { SyntaxErrorSearchDataException } from './errors/error-handler';
-import { AddTodoDto } from './dto/add-todo.dto';
-import { UpdateTodoDto } from './dto/update-todo.dto';
+
 import { FilterDatas } from './dto/get-pagination-todo.dto';
 import { GetRequestDurationInterceptor } from './interceptors/get-request-duration.interceptor';
+
+import { AddTodoDto } from './dto/add-todo.dto';
+import { UpdateTodoDto } from './dto/update-todo.dto';
 
 @UseInterceptors(GetRequestDurationInterceptor)
 @Controller('todo')
 export class TodoController {
-  todo: Array<Todo>;
-
-  constructor(private todoService: TodoService) {
-    this.todo = [];
-  }
+  constructor(private todoService: TodoService) {}
 
   @Get()
-  getAllTodos(
-    @Body() data: Todo,
-    @Query() query: FilterDatas,
-    @Res() response: Response,
-  ) {
-    const todo = this.todoService.getAllTodos(query);
-    response.status(200).send({ status: 'OK', data: todo });
-  }
-
-  @Get(':id')
-  getTodo(@Param('id') params, @Res() res: Response) {
-    try {
-      const data = this.todoService.getTodo(params);
-      res.status(200).send({ status: 'OK', data: data });
-    } catch (e) {
-      throw new SyntaxErrorSearchDataException();
-    }
+  async getAllTodos(@Query() query: FilterDatas): Promise<Array<Todo>> {
+    return await this.todoService.getAllTodos(query);
   }
 
   @Post()
-  addTodo(@Body() myData: AddTodoDto, @Res() res: Response) {
-    try {
-      this.todoService.addTodo(myData);
-      res.status(201).send({ status: 'Objet crée avec succès', data: myData });
-    } catch (e) {
-      res.status(e?.status || 500).send({
-        status: 'FAILED',
-        data: {
-          code: e?.status || 500,
-          error: e.message || e,
-        },
-      });
-    }
+  async addTodo(@Body() data: AddTodoDto): Promise<Todo> {
+    return await this.todoService.addTodo(data);
   }
 
   @Patch(':id')
-  updateTodo(
+  async updateTodo(
     @Param('id') todoId: string,
-    @Body() body: UpdateTodoDto,
-    @Res() res: Response,
-  ) {
-    if (!todoId) {
-      res.status(HttpStatus.NOT_ACCEPTABLE).send({
-        status: 'FAILED',
-        data: {
-          code: HttpStatus.NOT_ACCEPTABLE,
-          error: 'Spécifier une référence',
-        },
-      });
-    }
-
-    try {
-      const dataToUpdate = this.todoService.updateTodo(todoId, body);
-      res.status(200).send({ status: 'OK', data: dataToUpdate });
-    } catch (e) {
-      res.status(e?.status || 500).send({
-        status: 'FAILED',
-        data: { code: HttpStatus.NOT_FOUND, error: e?.message || e },
-      });
-    }
+    @Body() data: UpdateTodoDto,
+  ): Promise<Todo> {
+    return await this.todoService.updateTodo(todoId, data);
   }
 
   @Delete(':id')
-  deleteTodo(@Req() req: Request, @Res() res: Response) {
-    try {
-      const data = this.todoService.deleteTodo(req.params.id);
-      res.status(200).send({ status: 'OK', data: data });
-    } catch (e) {
-      throw new SyntaxErrorSearchDataException();
-    }
+  async deleteTodo(@Param('id') todoId: string): Promise<Todo> {
+    return await this.todoService.deleteTodo(todoId);
+  }
+
+  //Archiver une tâche
+  @Delete('/archiver/:id')
+  async archiverTodo(@Param('id') todoId: string) {
+    return await this.todoService.archiverTodo(todoId);
+  }
+
+  //Desarchiver une tâche
+  @Get('/archive/:id')
+  async desarchiverTodo(@Param('id') todoId: string) {
+    return await this.todoService.desarchiverTodo(todoId);
   }
 }

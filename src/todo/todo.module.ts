@@ -10,9 +10,12 @@ import { TodoMiddleware } from './middleware/todo.middleware';
 import { logger } from './middleware/logger.middleware';
 import { MorganMiddleware } from '@nest-middlewares/morgan';
 import { HelmetMiddleware } from '@nest-middlewares/helmet';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Todo } from './entities/todo.entity';
 
 @Module({
   controllers: [TodoController],
+  imports: [TypeOrmModule.forFeature([Todo])],
   providers: [TodoService],
 })
 export class TodoModule implements NestModule {

@@ -1,6 +1,8 @@
+import { User } from 'src/user/entities/user.entity';
 import {
   Column,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { TimestampEntitie } from '../generics/timestamp.entities';
@@ -30,5 +32,7 @@ export class Todo extends TimestampEntitie {
   })
   status: string;
 
+  @ManyToOne(type => User, (user) => user.todo)
+  user: User;
 
 }

@@ -23,6 +23,7 @@ export class TodoService {
           'todo.status',
           'todo.dateToCreate',
         ])
+        .orderBy('dateToCreate', 'DESC')
         .take(query.item);
       return qb.getMany();
     }
@@ -31,6 +32,9 @@ export class TodoService {
         select: ['name', 'status', 'description', 'dateToCreate'],
         where: {
           status: query.status,
+        },
+        order: {
+          dateToCreate: 'DESC',
         },
       });
     }

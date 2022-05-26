@@ -16,6 +16,12 @@ export class User {
   @Column()
   password: string;
 
+  @Column({ default: '1234' })
+  salt: string;
+
+  @Column({ default: true })
+  isActive: boolean;
+
   @OneToMany(() => Todo, (todo) => todo.user, { cascade: ['remove'] })
   todo: Todo[];
 }

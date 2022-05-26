@@ -16,6 +16,6 @@ export class User {
   @Column()
   password: string;
 
-  @OneToMany(() => Todo, (todo) => todo.user)
+  @OneToMany(() => Todo, (todo) => todo.user, { cascade: ['remove'] })
   todo: Todo[];
 }

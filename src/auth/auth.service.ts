@@ -44,14 +44,13 @@ export class AuthService {
 
   async login(userLogin: LoginDto) {
     // Todo: Récupération des données envoyées par le user
-    const { username, password, email } = userLogin;
+    const { username, password } = userLogin;
 
-    // ?Vérification s'il existe un user avec ce username
+    // ?Vérification s'il existe un user avec ce
     const user = await this.userRepository
       .createQueryBuilder('user')
-      .where('username = :username or email = :email', {
+      .where('username = :username or email = :username', {
         username: username,
-        email: email,
       })
       .getOne();
 

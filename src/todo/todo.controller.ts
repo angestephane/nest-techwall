@@ -6,9 +6,11 @@ import {
   Param,
   Patch,
   Post,
-  Query, UseGuards,
-  UseInterceptors
-} from "@nestjs/common";
+  Query,
+  Req,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { TodoService } from './todo.service';
 
 import { Todo } from './entities/todo.entity';
@@ -18,7 +20,9 @@ import { GetRequestDurationInterceptor } from './interceptors/get-request-durati
 
 import { AddTodoDto } from './dto/add-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
-import { JwtAuthGuard } from "../auth/awt-auth.guard";
+import { JwtAuthGuard } from '../auth/awt-auth.guard';
+import { Request } from 'express';
+import { User } from '../auth/decorators/user.decorator';
 
 @UseInterceptors(GetRequestDurationInterceptor)
 @Controller('todo')
@@ -26,21 +30,31 @@ export class TodoController {
   constructor(private todoService: TodoService) {}
 
   // Obtenir la liste des todoListe
+  @UseGuards(JwtAuthGuard)
   @Get()
-  async getAllTodos(@Query() query: FilterDatas): Promise<Array<Todo>> {
-    return await this.todoService.getAllTodos(query);
+  async getAllTodos(
+    @Query() query: FilterDatas,
+    @User() user,
+  ): Promise<Array<Todo>> {
+    return await this.todoService.getAllTodos(query, user);
   }
 
   // Retourne le nombre de tâche terminées
+  @UseGuards(JwtAuthGuard)
   @Get('stats')
-  async countTask(@Query() status: FilterDatas) {
-    return await this.todoService.countTask(status);
+  async countTask(@Query() status: FilterDatas, @User() user) {
+    return await this.todoService.countTask(status, user);
   }
+
   // Ajouter un nouveau todoListe
   @UseGuards(JwtAuthGuard)
   @Post()
-  async addTodo(@Body() data: AddTodoDto): Promise<Todo> {
-    return await this.todoService.addTodo(data);
+  async addTodo(
+    @Body() data: AddTodoDto,
+    @Req() request: Request,
+  ): Promise<Todo> {
+    const user = request.user;
+    return await this.todoService.addTodo(data, user);
   }
 
   // Mise à jour d'une todoListe
@@ -54,9 +68,10 @@ export class TodoController {
   }
 
   //obtenir une données via son id
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async getOneTodo(@Param('id') todoId: string): Promise<Todo> {
-    return await this.todoService.getOneTodo(todoId);
+  async getOneTodo(@Param('id') todoId: string, @User() user): Promise<Todo> {
+    return await this.todoService.getOneTodo(todoId, user);
   }
 
   // Supprimer un todoListe

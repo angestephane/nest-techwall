@@ -1,15 +1,10 @@
 import { User } from 'src/user/entities/user.entity';
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { TimestampEntitie } from '../generics/timestamp.entities';
 
 export enum StatusTask {
   EN_COURS = 'En cours',
-  TERMINEE= 'Terminée',
+  TERMINEE = 'Terminée',
 }
 
 @Entity('todo')
@@ -17,22 +12,19 @@ export class Todo extends TimestampEntitie {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({
-    unique: true
-  })
+  @Column('varchar', { length: 15 })
   name: string;
 
-  @Column('varchar', {length: 50})
+  @Column('varchar', { length: 50 })
   description: string;
 
   @Column({
     type: 'enum',
     enum: StatusTask,
-    default: StatusTask.EN_COURS
+    default: StatusTask.EN_COURS,
   })
   status: string;
 
-  @ManyToOne(type => User, (user) => user.todo)
+  @ManyToOne((type) => User, (user) => user.todo)
   user: User;
-
 }

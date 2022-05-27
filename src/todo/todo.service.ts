@@ -5,6 +5,7 @@ import { UpdateTodoDto } from './dto/update-todo.dto';
 import { FilterDatas } from './dto/get-query-todo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class TodoService {
@@ -13,7 +14,7 @@ export class TodoService {
     private todoRepository: Repository<Todo>,
   ) {}
 
-  async getAllTodos(query: FilterDatas): Promise<Todo[]> {
+  async getAllTodos(query: FilterDatas, user): Promise<Todo[]> {
     if (query.item) {
       const qb = await this.todoRepository
         .createQueryBuilder('todo')
@@ -23,6 +24,7 @@ export class TodoService {
           'todo.status',
           'todo.dateToCreate',
         ])
+        .where('user = :user', { user: user })
         .orderBy('dateToCreate', 'DESC')
         .take(query.item);
       return qb.getMany();
@@ -32,6 +34,7 @@ export class TodoService {
         select: ['name', 'status', 'description', 'dateToCreate'],
         where: {
           status: query.status,
+          user: user,
         },
         order: {
           dateToCreate: 'DESC',
@@ -41,17 +44,25 @@ export class TodoService {
     return await this.todoRepository.find({
       select: ['name', 'status', 'description', 'dateToCreate'],
       order: { dateToCreate: 'DESC' },
+      where: {
+        user: user,
+      },
     });
   }
 
-  async getOneTodo(todoId: string): Promise<Todo> {
+  async getOneTodo(todoId: string, user): Promise<Todo> {
     return await this.todoRepository.findOne(todoId, {
       select: ['name', 'status', 'description', 'dateToCreate'],
+      where: {
+        user: user,
+      },
     });
   }
 
-  async addTodo(data: AddTodoDto): Promise<Todo> {
-    return await this.todoRepository.save(data);
+  async addTodo(data: AddTodoDto, user): Promise<Todo> {
+    const newTodo = await this.todoRepository.create(data);
+    newTodo.user = user;
+    return await this.todoRepository.save(newTodo);
   }
 
   async updateTodo(todoId: string, todoUpdated: UpdateTodoDto): Promise<Todo> {
@@ -100,11 +111,14 @@ export class TodoService {
    * !compter le nombre de tâche accomplies, et en cours
    * !Même logique pour les tâches en cours
    */
-  async countTask(status: FilterDatas) {
+  async countTask(status: FilterDatas, user) {
     const qb = this.todoRepository.createQueryBuilder('countTask');
     qb.select(
       "countTask.status, count(countTask.id) as 'Nombre tâches Terminées'",
-    ).where('countTask.status = :status', { status: status.status });
+    ).where('countTask.status = :status && user= :user', {
+      status: status.status,
+      user: user,
+    });
     return await qb.getRawOne();
   }
 }

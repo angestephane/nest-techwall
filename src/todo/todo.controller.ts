@@ -10,7 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
-import { Request, Response } from 'express';
+
 import { Todo } from './entities/todo.entity';
 
 import { FilterDatas } from './dto/get-query-todo.dto';

@@ -56,7 +56,7 @@ export class TodoService {
 
   async updateTodo(todoId: string, todoUpdated: UpdateTodoDto): Promise<Todo> {
     /***
-     * TODO: On récupère la tache à l'id 'todoId, on remplace les
+     * TODO: On récupère la tache à l'id 'todoId, on remplace
      * TODO: les données par ceux de todoUpdated
      * *****/
     const newTodo = await this.todoRepository.preload({

@@ -11,14 +11,13 @@ import { Repository } from 'typeorm';
 import { SubscribeDto } from './dto/subscribe.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
-import { TodoService } from '../todo/todo.service';
-import { FilterDatas } from "../todo/dto/get-query-todo.dto";
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
-    private todoService: TodoService,
+    private jwtService: JwtService,
   ) {}
 
   async addUser(userData: SubscribeDto) {
@@ -45,12 +44,15 @@ export class AuthService {
 
   async login(userLogin: LoginDto) {
     // Todo: Récupération des données envoyées par le user
-    const { username, password } = userLogin;
+    const { username, password, email } = userLogin;
 
     // ?Vérification s'il existe un user avec ce username
     const user = await this.userRepository
       .createQueryBuilder('user')
-      .where('username = :username', { username: username })
+      .where('username = :username or email = :email', {
+        username: username,
+        email: email,
+      })
       .getOne();
 
     // ?Déclanche une erreur si le user n'existe pas
@@ -66,7 +68,14 @@ export class AuthService {
 
     // ?Vérification du mot de passe
     if (hashPassword === user.password) {
-      return 'connexion reussi';
+      type UserPayload = Pick<LoginDto, 'username' | 'email'>;
+
+      const payload: UserPayload = {
+        username: user.username,
+        email: user.email,
+      };
+
+      return this.jwtService.sign(payload);
     } else {
       throw new BadRequestException({
         code: HttpStatus.BAD_REQUEST,

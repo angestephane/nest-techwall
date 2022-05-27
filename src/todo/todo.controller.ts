@@ -6,9 +6,9 @@ import {
   Param,
   Patch,
   Post,
-  Query,
-  UseInterceptors,
-} from '@nestjs/common';
+  Query, UseGuards,
+  UseInterceptors
+} from "@nestjs/common";
 import { TodoService } from './todo.service';
 
 import { Todo } from './entities/todo.entity';
@@ -18,6 +18,7 @@ import { GetRequestDurationInterceptor } from './interceptors/get-request-durati
 
 import { AddTodoDto } from './dto/add-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
+import { JwtAuthGuard } from "../auth/awt-auth.guard";
 
 @UseInterceptors(GetRequestDurationInterceptor)
 @Controller('todo')
@@ -36,12 +37,14 @@ export class TodoController {
     return await this.todoService.countTask(status);
   }
   // Ajouter un nouveau todoListe
+  @UseGuards(JwtAuthGuard)
   @Post()
   async addTodo(@Body() data: AddTodoDto): Promise<Todo> {
     return await this.todoService.addTodo(data);
   }
 
   // Mise à jour d'une todoListe
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async updateTodo(
     @Param('id') todoId: string,
@@ -57,18 +60,21 @@ export class TodoController {
   }
 
   // Supprimer un todoListe
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async deleteTodo(@Param('id') todoId: string): Promise<Todo> {
     return await this.todoService.deleteTodo(todoId);
   }
 
   //Archiver une tâche
+  @UseGuards(JwtAuthGuard)
   @Delete('/archiver/:id')
   async archiverTodo(@Param('id') todoId: string) {
     return await this.todoService.archiverTodo(todoId);
   }
 
   //Desarchiver une tâche
+  @UseGuards(JwtAuthGuard)
   @Get('/archive/:id')
   async desarchiverTodo(@Param('id') todoId: string) {
     return await this.todoService.desarchiverTodo(todoId);

@@ -27,7 +27,7 @@
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 Ce projet utilise une base de données mysql...
 
-Une simple todo liste avec l'utilisation des authorisaton pour executer certaines fonctionnalités.
+Une simple todo liste avec l'utilisation des authorisations pour executer certaines fonctionnalités.
 
 ## Installation
 
